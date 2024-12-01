@@ -1,10 +1,10 @@
 package blob
 
 import (
-    "testing"
-    "os"
-    "path/filepath"
-    "bytes"
+	"bytes"
+	"os"
+	"path/filepath"
+	"testing"
 )
 
 func TestBlobOperations(t *testing.T) {
@@ -46,7 +46,6 @@ func TestBlobOperations(t *testing.T) {
         if err != nil {
             t.Fatalf("Failed to read blob: %v", err)
         }
-
         // Verify content matches
         if !bytes.Equal(readBlob.Content(), content) {
             t.Error("Retrieved content doesn't match original")
