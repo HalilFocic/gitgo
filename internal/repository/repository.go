@@ -28,6 +28,7 @@ func Init(path string) (*Repository, error) {
 	objectsPath := filepath.Join(gitGoPath, "objects")
 	refsPath := filepath.Join(gitGoPath, "refs")
 	headsPath := filepath.Join(gitGoPath, "refs/heads")
+	indexPath := filepath.Join(gitGoPath, "index")
 	err = os.MkdirAll(gitGoPath, 0755)
 	if err != nil {
 		return nil, err
@@ -44,7 +45,11 @@ func Init(path string) (*Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	indexFile, err := os.Create(indexPath)
+	if err != nil {
+		return nil, err
+	}
+	indexFile.Close()
 	return &Repository{
 		Path:     absPath,
 		GitgoDir: gitGoPath,

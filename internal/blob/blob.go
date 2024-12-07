@@ -53,7 +53,7 @@ func (b *Blob) Store(objectsDir string) error {
 	if err != nil {
 		return err
 	}
-    defer file.Close()
+	defer file.Close()
 	writer := zlib.NewWriter(file)
 	defer writer.Close()
 	header := fmt.Sprintf("blob %d%c", len(b.content), 0)
@@ -73,7 +73,7 @@ func Read(objectsDir, hash string) (*Blob, error) {
 	if err != nil {
 		return nil, err
 	}
-    defer file.Close()
+	defer file.Close()
 
 	reader, err := zlib.NewReader(file)
 
