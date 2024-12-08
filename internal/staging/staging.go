@@ -7,15 +7,14 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/HalilFocic/gitgo/internal/blob"
+	"github.com/HalilFocic/gitgo/internal/repository"
 	"io"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"time"
-
-	"github.com/HalilFocic/gitgo/internal/blob"
-	"github.com/HalilFocic/gitgo/internal/repository"
 )
 
 type Entry struct {
