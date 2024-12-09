@@ -9,13 +9,14 @@ import (
 func TestTreeOperations(t *testing.T) {
 	t.Run("1.1: Create new tree and add entries", func(t *testing.T) {
 		tree := New()
-
-		err := tree.AddEntry("main.go", "abc123", RegularFileMode)
+		fileHash := "1234567890123456789012345678901234567890"
+		dirHash := "abcdefabcdefabcdefabcdefabcdefabcdefabcd"
+		err := tree.AddEntry("main.go", fileHash, RegularFileMode)
 		if err != nil {
 			t.Fatalf("Failed to add file entry: %v", err)
 		}
 
-		err = tree.AddEntry("lib", "def456", DirectoryMode)
+		err = tree.AddEntry("lib", dirHash, DirectoryMode)
 		if err != nil {
 			t.Fatalf("Failed to add directory entry: %v", err)
 		}
@@ -25,13 +26,15 @@ func TestTreeOperations(t *testing.T) {
 			t.Fatalf("Expected 2 entries, got %d", len(entries))
 		}
 
-		if entries[0].Name != "main.go" {
+		// 1 was used instead of zero because m is after l alphabetically
+		// since we sorted the entries, this makes impact
+		if entries[1].Name != "main.go" {
 			t.Errorf("Expected name 'main.go', got %s", entries[0].Name)
 		}
-		if entries[0].Hash != "abc123" {
+		if entries[1].Hash != fileHash {
 			t.Errorf("Expected hash 'abc123', got %s", entries[0].Hash)
 		}
-		if entries[0].Mode != RegularFileMode {
+		if entries[1].Mode != RegularFileMode {
 			t.Errorf("Expected mode %o, got %o", RegularFileMode, entries[0].Mode)
 		}
 	})
