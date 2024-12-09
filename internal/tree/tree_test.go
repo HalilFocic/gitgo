@@ -109,3 +109,89 @@ func TestTreeOperations(t *testing.T) {
 	})
 
 }
+
+func TestTreeEdgeCases(t *testing.T) {
+	t.Run("2.1: Special characters in filename", func(t *testing.T) {
+		tree := New()
+		hash := "1234567890123456789012345678901234567890"
+        // This test tries to add files with special characters
+		specialNames := []string{
+			"hello world.txt",
+			"!@#$%.txt",
+			"über.txt",
+			"file名前.txt",
+		}
+
+		for _, name := range specialNames {
+			err := tree.AddEntry(name, hash, RegularFileMode)
+			if err != nil {
+				t.Errorf("Failed to add file with special name '%s': %v", name, err)
+			}
+		}
+
+		// Test write/read with special characters
+		cwd, _ := os.Getwd()
+		testDir := filepath.Join(cwd, "testdata")
+		os.MkdirAll(filepath.Join(testDir, ".gitgo", "objects"), 0755)
+		defer os.RemoveAll(testDir)
+
+		treeHash, err := tree.Write(filepath.Join(testDir, ".gitgo", "objects"))
+		if err != nil {
+			t.Fatalf("Failed to write tree: %v", err)
+		}
+
+		readTree, err := Read(filepath.Join(testDir, ".gitgo", "objects"), treeHash)
+		if err != nil {
+			t.Fatalf("Failed to read tree: %v", err)
+		}
+
+		for _, name := range specialNames {
+			found := false
+			for _, entry := range readTree.Entries() {
+				if entry.Name == name {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("Failed to find entry '%s' after read", name)
+			}
+		}
+	})
+
+	t.Run("2.2: Empty tree", func(t *testing.T) {
+		tree := New()
+
+		cwd, _ := os.Getwd()
+		testDir := filepath.Join(cwd, "testdata")
+		os.MkdirAll(filepath.Join(testDir, ".gitgo", "objects"), 0755)
+		defer os.RemoveAll(testDir)
+
+		hash, err := tree.Write(filepath.Join(testDir, ".gitgo", "objects"))
+		if err != nil {
+			t.Fatalf("Failed to write empty tree: %v", err)
+		}
+
+		readTree, err := Read(filepath.Join(testDir, ".gitgo", "objects"), hash)
+		if err != nil {
+			t.Fatalf("Failed to read empty tree: %v", err)
+		}
+
+		if len(readTree.Entries()) != 0 {
+			t.Errorf("Expected empty tree, got %d entries", len(readTree.Entries()))
+		}
+	})
+
+	t.Run("2.3: Invalid UTF-8", func(t *testing.T) {
+		tree := New()
+		hash := "1234567890123456789012345678901234567890"
+
+		// Create invalid UTF-8 string
+		invalidName := string([]byte{0xFF, 0xFE, 0xFD})
+
+		err := tree.AddEntry(invalidName, hash, RegularFileMode)
+		if err == nil {
+			t.Error("Expected error for invalid UTF-8 filename")
+		}
+	})
+}

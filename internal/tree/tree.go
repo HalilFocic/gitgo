@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 const (
@@ -55,6 +56,9 @@ func (tree *Tree) AddEntry(name, hash string, filemode int) error {
 	if len(hash) != 40 {
 		return fmt.Errorf("invalid hash length: expected 40 characters, got %d", len(hash))
 	}
+    if !utf8.ValidString(name) {
+        return fmt.Errorf("invalid UTF-8 in filename")
+    }
 	if filemode != RegularFileMode && filemode != ExecutableMode && filemode != DirectoryMode {
 		return fmt.Errorf("Invalid file mode.")
 	}
