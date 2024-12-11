@@ -114,7 +114,7 @@ func TestTreeEdgeCases(t *testing.T) {
 	t.Run("2.1: Special characters in filename", func(t *testing.T) {
 		tree := New()
 		hash := "1234567890123456789012345678901234567890"
-        // This test tries to add files with special characters
+		// This test tries to add files with special characters
 		specialNames := []string{
 			"hello world.txt",
 			"!@#$%.txt",
