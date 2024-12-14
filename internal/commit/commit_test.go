@@ -177,9 +177,9 @@ func TestCommitStorage(t *testing.T) {
 		}
 
 		/*
-					This additional logic was added since we didn't store nanoseconds
-					on disk and regular date comparison was failing. With this logic we check if difference between
-		            written and read commit is greater than 1 second.
+						This additional logic was added since we didn't store nanoseconds
+						on disk and regular date comparison was failing. With this logic we check if difference between
+			            written and read commit is greater than 1 second.
 		*/
 		timeDiff := readCommit.AuthorDate.Sub(commit.AuthorDate)
 		if timeDiff.Seconds() > 1 {

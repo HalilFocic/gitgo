@@ -41,12 +41,16 @@ func New(root string) (*Index, error) {
 	if !repository.IsRepository(absPath) {
 		return nil, errors.New("not a gitgo repository")
 	}
-
 	entries := make(map[string]*Entry)
-	return &Index{
+	idx := &Index{
 		root:    root,
 		entries: entries,
-	}, nil
+	}
+	err = idx.Read()
+	if err != nil {
+		return nil, fmt.Errorf("error pri citanju indexa na new %v", err)
+	}
+	return idx, nil
 }
 
 func (idx *Index) Add(path string) error {
@@ -89,6 +93,10 @@ func (idx *Index) Add(path string) error {
 		Modified: fileStat.ModTime(),
 	}
 	idx.entries[relPath] = &entry
+	err = idx.Write()
+	if err != nil {
+		return fmt.Errorf("faild to write index: %v", err)
+	}
 	return nil
 }
 
@@ -259,14 +267,22 @@ func (idx *Index) Write() error {
 
 func (idx *Index) Read() error {
 	indexPath := filepath.Join(idx.root, ".gitgo", "index")
-
-	file, err := os.Open(indexPath)
+	stat, err := os.Stat(indexPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			idx.Clear()
 			return nil
 		}
-		return fmt.Errorf("failed to open index file %v", err)
+		return fmt.Errorf("failed to stat index file: %v", err)
+	}
+	if stat.Size() == 0 {
+		idx.Clear()
+		return nil
+	}
+
+	file, err := os.Open(indexPath)
+	if err != nil {
+		return fmt.Errorf("failed to open index file: %v", err)
 	}
 	defer file.Close()
 

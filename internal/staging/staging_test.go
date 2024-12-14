@@ -57,6 +57,7 @@ func TestStaingArea(t *testing.T) {
 	})
 
 	t.Run("1.2: Multiple file staging", func(t *testing.T) {
+		os.Remove(filepath.Join(".gitgo", "index"))
 		index, err := New(".")
 		if err != nil {
 			t.Fatalf("failed to create index: %v", err)
@@ -90,6 +91,7 @@ func TestStaingArea(t *testing.T) {
 	})
 
 	t.Run("1.3 Update staged file", func(t *testing.T) {
+		os.Remove(filepath.Join(".gitgo", "index"))
 		index, err := New(".")
 		if err != nil {
 			t.Fatalf("Failed to create index %v", err)
@@ -121,6 +123,7 @@ func TestStaingArea(t *testing.T) {
 	})
 
 	t.Run("1.4 Remove file from staging", func(t *testing.T) {
+		os.Remove(filepath.Join(".gitgo", "index"))
 		index, err := New(".")
 
 		if err != nil {
@@ -149,6 +152,7 @@ func TestStaingArea(t *testing.T) {
 	})
 
 	t.Run("1.5: Write and read index", func(t *testing.T) {
+		os.Remove(filepath.Join(".gitgo", "index"))
 		index, err := New(".")
 		if err != nil {
 			t.Fatalf("Failed to created index: %v", err)
@@ -188,6 +192,7 @@ func TestStaingArea(t *testing.T) {
 	})
 
 	t.Run("1.6: Clear index", func(t *testing.T) {
+		os.Remove(filepath.Join(".gitgo", "index"))
 		index, err := New(".")
 		if err != nil {
 			t.Fatalf("Failed to create index: %v", err)
