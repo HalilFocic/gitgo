@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -21,13 +22,13 @@ func Init(path string) (*Repository, error) {
 
 	file, err := os.Stat(gitGoPath)
 	if err == nil && file != nil {
-		log.Println("Error bio kada citam stat")
-		return nil, errors.New(".gitgo already exists")
+		return nil, errors.New("repository already exists in this repository")
 	}
 
 	objectsPath := filepath.Join(gitGoPath, "objects")
 	refsPath := filepath.Join(gitGoPath, "refs")
 	headsPath := filepath.Join(gitGoPath, "refs/heads")
+
 	indexPath := filepath.Join(gitGoPath, "index")
 	err = os.MkdirAll(gitGoPath, 0755)
 	if err != nil {
@@ -49,7 +50,14 @@ func Init(path string) (*Repository, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	indexFile.Close()
+	headPath := filepath.Join(gitGoPath, "HEAD")
+	err = os.WriteFile(headPath, []byte("ref: refs/heads/main\n"), 0755)
+	if err != nil {
+		os.RemoveAll(gitGoPath)
+		return nil, fmt.Errorf("failed to create HEAD file: %v", err)
+	}
 	return &Repository{
 		Path:     absPath,
 		GitgoDir: gitGoPath,
