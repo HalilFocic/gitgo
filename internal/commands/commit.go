@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -44,19 +45,36 @@ func (c *CommitCommand) Execute() error {
 		return fmt.Errorf("failed to create tree: %v", err)
 	}
 
+	headContent, err := os.ReadFile(filepath.Join(c.rootPath, ".gitgo", "HEAD"))
+	if err != nil {
+		return err
+	}
+
+	headRef := strings.TrimSpace(string(headContent))
+	if !strings.HasPrefix(headRef, "ref: refs/heads/") {
+		return fmt.Errorf("invalid HEAD format")
+	}
+
+	branchName := strings.TrimPrefix(headRef, "ref: refs/heads/")
+	branchPath := filepath.Join(c.rootPath, ".gitgo", "refs", "heads", branchName)
 	parentHash := ""
+	if hash, err := os.ReadFile(branchPath); err == nil {
+		parentHash = strings.TrimSpace(string(hash))
+	}
 
 	newCommit, err := commit.New(treeHash, parentHash, c.author, c.message)
 	if err != nil {
 		return fmt.Errorf("failed to create commit: %v", err)
 	}
 
-	_, err = newCommit.Write(objectsPath)
+	commitHash, err := newCommit.Write(objectsPath)
 	if err != nil {
-		return fmt.Errorf("failed to create commit :%v", err)
+		return fmt.Errorf("failed to write commit :%v", err)
 	}
 
-	//TODO: implement the checking of the previous commit
+	if err := os.WriteFile(branchPath, []byte(commitHash), 0644); err != nil {
+		return fmt.Errorf("failed to update branch reference: %v", err)
+	}
 	return nil
 }
 
