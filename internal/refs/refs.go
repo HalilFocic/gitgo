@@ -73,3 +73,43 @@ func UpdateRef(rootPath, name, target string, isSymbolic bool) error {
 	}
 	return nil
 }
+
+func WriteHead(rootPath, target string, isSymbol bool) error {
+	return UpdateRef(rootPath, HeadFile, target, isSymbol)
+}
+
+func CreateBranch(rootPath, name, commitHash string) error {
+	if strings.Contains(name, "/") {
+		return fmt.Errorf("branch cannot contain slashes")
+	}
+	if name == "" {
+		return fmt.Errorf("branch name cannot be empty")
+	}
+
+	branchRef := filepath.Join("refs", "heads", name)
+	if _, err := ReadRef(rootPath, branchRef); err == nil {
+		return fmt.Errorf("branch %s already exists", name)
+	}
+	return UpdateRef(rootPath, branchRef, commitHash, false)
+}
+
+func DeleteBranch(rootPath, name string) error {
+	branchRef := filepath.Join("refs", "heads", name)
+	_, err := ReadRef(rootPath, branchRef)
+	if err != nil {
+		return fmt.Errorf("branch %s does not exist", name)
+	}
+	head, err := ReadHead(rootPath)
+	if err != nil {
+		return fmt.Errorf("failed to read head: %v", err)
+	}
+
+	if head.Type == RefTypeSymbolic && head.Target == branchRef {
+		return fmt.Errorf("cannot delete current branch %s", name)
+	}
+	branchPath := filepath.Join(rootPath, ".gitgo", branchRef)
+	if err := os.Remove(branchPath); err != nil {
+		return fmt.Errorf("failed to delete branch %s: %v", name, err)
+	}
+	return nil
+}
