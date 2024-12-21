@@ -46,6 +46,21 @@ func main() {
 			}
 		}
 		fmt.Printf("Sucessfully added %d files to index.\n", len(addCmd.Args()))
+	case "remove":
+		rmCmd := flag.NewFlagSet("remove", flag.ExitOnError)
+		rmCmd.Parse(os.Args[2:])
+		if rmCmd.NArg() < 1 {
+			fmt.Println("error: path required for 'remove'")
+			os.Exit(1)
+		}
+		for _, path := range rmCmd.Args() {
+			cmd := commands.NewRemoveCommand(cwd, path)
+			if err := cmd.Execute(); err != nil {
+				fmt.Printf("error: %v\n", err)
+				os.Exit(1)
+			}
+		}
+		fmt.Printf("Sucessfully removed %d files to index.\n", len(rmCmd.Args()))
 
 	case "commit":
 		commitCmd := flag.NewFlagSet("commit", flag.ExitOnError)
@@ -60,7 +75,7 @@ func main() {
 			fmt.Printf("error: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("Commit added sucessfully")
+		fmt.Printf("Commit added sucessfully\n")
 
 	case "branch":
 		branchCmd := flag.NewFlagSet("branch", flag.ExitOnError)

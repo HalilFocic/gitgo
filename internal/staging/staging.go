@@ -95,13 +95,14 @@ func (idx *Index) Add(path string) error {
 	idx.entries[relPath] = &entry
 	err = idx.Write()
 	if err != nil {
-		return fmt.Errorf("faild to write index: %v", err)
+		return fmt.Errorf("failed to write index: %v", err)
 	}
 	return nil
 }
 
 func (idx *Index) Remove(path string) error {
-	relPath, err := filepath.Rel(idx.root, path)
+	absInputPath := filepath.Join(idx.root, filepath.Clean(path))
+	relPath, err := filepath.Rel(idx.root, absInputPath)
 	if err != nil {
 		return err
 	}
@@ -110,6 +111,10 @@ func (idx *Index) Remove(path string) error {
 		return fmt.Errorf("File is not in index entries")
 	}
 	delete(idx.entries, relPath)
+	err = idx.Write()
+	if err != nil {
+		return fmt.Errorf("failed to write to index: %v", err)
+	}
 	return nil
 }
 
