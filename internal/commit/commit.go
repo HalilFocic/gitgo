@@ -82,7 +82,7 @@ func (c *Commit) Write(objectsPath string) (string, error) {
 	}
 
 	// Write file
-	if err := os.WriteFile(hashPath, compressed.Bytes(), 0755); err != nil {
+	if err := os.WriteFile(hashPath, compressed.Bytes(), 0644); err != nil {
 		return "", fmt.Errorf("failed to write object file: %v", err)
 	}
 

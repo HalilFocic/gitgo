@@ -34,7 +34,7 @@ func TestStaingArea(t *testing.T) {
 
 	t.Run("1.1: Add file to staging", func(t *testing.T) {
 		content := []byte("test content")
-		if err := os.WriteFile("test.txt", content, 0755); err != nil {
+		if err := os.WriteFile("test.txt", content, 0644); err != nil {
 			t.Fatalf("Failed to create test.txt file: %v", err)
 		}
 
@@ -73,7 +73,7 @@ func TestStaingArea(t *testing.T) {
 				}
 			}
 
-			if err := os.WriteFile(f, []byte("content"), 0755); err != nil {
+			if err := os.WriteFile(f, []byte("content"), 0644); err != nil {
 				t.Fatalf("Failed to create file %s: %v", f, err)
 			}
 		}
@@ -98,7 +98,7 @@ func TestStaingArea(t *testing.T) {
 		}
 		defer index.Clear()
 
-		if err = os.WriteFile("update.txt", []byte("initial"), 0755); err != nil {
+		if err = os.WriteFile("update.txt", []byte("initial"), 0644); err != nil {
 			t.Fatalf("Failed to create update.txt file: %v", err)
 		}
 		err = index.Add("update.txt")
@@ -107,7 +107,7 @@ func TestStaingArea(t *testing.T) {
 		}
 		initialHash := index.Entries()[0].Hash
 
-		if err := os.WriteFile("update.txt", []byte("updated"), 0755); err != nil {
+		if err := os.WriteFile("update.txt", []byte("updated"), 0644); err != nil {
 			t.Fatalf("Failed to update the update.txt file:%v", err)
 		}
 		err = index.Add("update.txt")
@@ -131,7 +131,7 @@ func TestStaingArea(t *testing.T) {
 		}
 		defer index.Clear()
 
-		if err := os.WriteFile("remove.txt", []byte("content"), 0755); err != nil {
+		if err := os.WriteFile("remove.txt", []byte("content"), 0644); err != nil {
 			t.Fatalf("Failed to create test file: %v", err)
 		}
 
@@ -161,7 +161,7 @@ func TestStaingArea(t *testing.T) {
 		files := []string{"write.txt", "read.txt"}
 
 		for _, f := range files {
-			if err := os.WriteFile(f, []byte("content"), 0755); err != nil {
+			if err := os.WriteFile(f, []byte("content"), 0644); err != nil {
 				t.Fatalf("Failed to create file %s: %v", f, err)
 			}
 			if err := index.Add(f); err != nil {
@@ -199,7 +199,7 @@ func TestStaingArea(t *testing.T) {
 		}
 
 		// Add a file
-		if err := os.WriteFile("clear.txt", []byte("content"), 0755); err != nil {
+		if err := os.WriteFile("clear.txt", []byte("content"), 0644); err != nil {
 			t.Fatalf("Failed to create test file: %v", err)
 		}
 

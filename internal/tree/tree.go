@@ -120,7 +120,7 @@ func (tree *Tree) Write(objectsPath string) (string, error) {
 	if err := os.MkdirAll(filepath.Dir(hashPath), 0755); err != nil {
 		return "", fmt.Errorf("failed to create object directory: %v", err)
 	}
-	if err := os.WriteFile(hashPath, compressed.Bytes(), 0755); err != nil {
+	if err := os.WriteFile(hashPath, compressed.Bytes(), 0644); err != nil {
 		return "", fmt.Errorf("failed to write object file: %v", err)
 	}
 

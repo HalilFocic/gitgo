@@ -69,7 +69,7 @@ func Read(objectsDir, hash string) (*Blob, error) {
 	directory := hash[:2]
 	fileName := hash[2:]
 	fullFilePath := filepath.Join(objectsDir, directory, fileName)
-	file, err := os.OpenFile(fullFilePath, os.O_RDONLY, 0755)
+	file, err := os.OpenFile(fullFilePath, os.O_RDONLY, 0644)
 	if err != nil {
 		return nil, err
 	}

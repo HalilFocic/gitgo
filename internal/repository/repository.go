@@ -58,7 +58,7 @@ func Init(path string) (*Repository, error) {
 	indexFile.Close()
 	refMainFile.Close()
 	headPath := filepath.Join(gitGoPath, "HEAD")
-	err = os.WriteFile(headPath, []byte("ref: refs/heads/main\n"), 0755)
+	err = os.WriteFile(headPath, []byte("ref: refs/heads/main\n"), 0644)
 	if err != nil {
 		os.RemoveAll(gitGoPath)
 		return nil, fmt.Errorf("failed to create HEAD file: %v", err)
