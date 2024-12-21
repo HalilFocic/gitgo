@@ -60,7 +60,7 @@ func main() {
 			fmt.Printf("error: %v\n", err)
 			os.Exit(1)
 		}
-        fmt.Printf("Commit added sucessfully")
+		fmt.Printf("Commit added sucessfully")
 
 	case "branch":
 		branchCmd := flag.NewFlagSet("branch", flag.ExitOnError)

@@ -54,17 +54,17 @@ func New(root string) (*Index, error) {
 }
 
 func (idx *Index) Add(path string) error {
-	absPath := filepath.Join(idx.root, path)
+	absInputPath := filepath.Join(idx.root, filepath.Clean(path))
 	objectsPath := filepath.Join(idx.root, ".gitgo/objects")
-	relPath, err := filepath.Rel(idx.root, path)
+	relPath, err := filepath.Rel(idx.root, absInputPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get relative path: %v", err)
 	}
 	if strings.HasPrefix(relPath, "..") {
 		return fmt.Errorf("path %s is outside repository", path)
 	}
 
-	fileStat, err := os.Stat(absPath)
+	fileStat, err := os.Stat(absInputPath)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func (idx *Index) Add(path string) error {
 	if fileStat.Mode()&os.ModeSymlink != 0 {
 		return fmt.Errorf("symlinks are not supported")
 	}
-	content, err := os.ReadFile(absPath)
+	content, err := os.ReadFile(absInputPath)
 	if err != nil {
 		return err
 	}
