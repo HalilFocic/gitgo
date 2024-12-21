@@ -101,7 +101,16 @@ func main() {
 			fmt.Printf("error: %v\n", err)
 			os.Exit(1)
 		}
+	case "log":
+		logCmd := flag.NewFlagSet("log", flag.ExitOnError)
+		maxCount := logCmd.Int("n", -1, "limit number of commits")
+		logCmd.Parse(os.Args[2:])
 
+		cmd := commands.NewLogCommand(cwd, *maxCount)
+		if err := cmd.Execute(); err != nil {
+			fmt.Printf("error: %v\n", err)
+			os.Exit(1)
+		}
 	default:
 		fmt.Printf("Unknown command: %s\n", os.Args[1])
 		os.Exit(1)

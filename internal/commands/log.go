@@ -29,8 +29,16 @@ func (c *LogCommand) Execute() error {
 	if err != nil {
 		return fmt.Errorf("failed to read HEAD: %v", err)
 	}
-
-	currentCommitHash := headRef.Target
+	var currentCommitHash string
+	if headRef.Type == refs.RefTypeCommit {
+		currentCommitHash = headRef.Target
+	} else {
+		newRef, err := refs.ReadRef(c.rootPath, headRef.Target)
+		if err != nil {
+			return fmt.Errorf("failed to read link inside head: %v", err)
+		}
+		currentCommitHash = newRef.Target
+	}
 	commitCount := 0
 
 	for currentCommitHash != "" {

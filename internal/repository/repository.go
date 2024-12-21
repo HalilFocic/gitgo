@@ -27,6 +27,7 @@ func Init(path string) (*Repository, error) {
 	objectsPath := filepath.Join(gitGoPath, "objects")
 	refsPath := filepath.Join(gitGoPath, "refs")
 	headsPath := filepath.Join(gitGoPath, "refs/heads")
+	mainPath := filepath.Join(gitGoPath, "refs/heads/main")
 
 	indexPath := filepath.Join(gitGoPath, "index")
 	err = os.MkdirAll(gitGoPath, 0755)
@@ -49,8 +50,13 @@ func Init(path string) (*Repository, error) {
 	if err != nil {
 		return nil, err
 	}
+	refMainFile, err := os.Create(mainPath)
+	if err != nil {
+		return nil, err
+	}
 
 	indexFile.Close()
+	refMainFile.Close()
 	headPath := filepath.Join(gitGoPath, "HEAD")
 	err = os.WriteFile(headPath, []byte("ref: refs/heads/main\n"), 0755)
 	if err != nil {
