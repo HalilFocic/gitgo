@@ -7,10 +7,6 @@ import (
 	"strings"
 )
 
-// "fmt"
-// "os"
-// "path/filepath"
-
 const (
 	RefTypeCommit = iota
 	RefTypeSymbolic

@@ -31,7 +31,6 @@ func TestStaingArea(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to initialize repository: %v", err)
 	}
-
 	t.Run("1.1: Add file to staging", func(t *testing.T) {
 		content := []byte("test content")
 		if err := os.WriteFile("test.txt", content, 0644); err != nil {
@@ -150,7 +149,6 @@ func TestStaingArea(t *testing.T) {
 			t.Fatalf("File should not be staged after removal")
 		}
 	})
-
 	t.Run("1.5: Write and read index", func(t *testing.T) {
 		os.Remove(filepath.Join(".gitgo", "index"))
 		index, err := New(".")
@@ -169,8 +167,6 @@ func TestStaingArea(t *testing.T) {
 			} else {
 				fmt.Printf("added to index : %v\n", f)
 			}
-			fmt.Printf("New count: %d\n", len(index.Entries()))
-
 		}
 		if err := index.Write(); err != nil {
 			t.Fatalf("Failed to write to index :%v", err)
@@ -182,9 +178,6 @@ func TestStaingArea(t *testing.T) {
 			t.Fatalf("Failed to create second index:%v", err)
 		}
 
-		if err := newIndex.Read(); err != nil {
-			t.Fatalf("Failed to read idnex: %v", err)
-		}
 		newEntries := newIndex.Entries()
 		if len(originalEntries) != len(newEntries) {
 			t.Fatalf("Entries count missmatch: expected %d, go %d", len(originalEntries), len(newEntries))

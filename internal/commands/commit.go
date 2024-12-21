@@ -36,15 +36,6 @@ func (c *CommitCommand) Execute() error {
 	if len(entries) == 0 {
 		return fmt.Errorf("nothing to commit, staging area is empty")
 	}
-
-	root := c.groupEntriesByDirectory(entries)
-
-	objectsPath := filepath.Join(c.rootPath, ".gitgo", "objects")
-	treeHash, err := c.createTreeFromNode(root, objectsPath)
-	if err != nil {
-		return fmt.Errorf("failed to create tree: %v", err)
-	}
-
 	headContent, err := os.ReadFile(filepath.Join(c.rootPath, ".gitgo", "HEAD"))
 	if err != nil {
 		return err
@@ -57,7 +48,29 @@ func (c *CommitCommand) Execute() error {
 
 	branchName := strings.TrimPrefix(headRef, "ref: refs/heads/")
 	branchPath := filepath.Join(c.rootPath, ".gitgo", "refs", "heads", branchName)
+
+	var previousTreeHash string
 	parentHash := ""
+
+	if previousCommitHash, err := os.ReadFile(branchPath); err == nil {
+		parentHash = strings.TrimSpace(string(previousCommitHash))
+
+		if parentHash != "" {
+			previousCommit, err := commit.Read(filepath.Join(c.rootPath, ".gitgo", "objects"), parentHash)
+			if err != nil {
+				return fmt.Errorf("failed to read previous commit :%v", err)
+			}
+			previousTreeHash = previousCommit.TreeHash
+
+		}
+	}
+	objectsPath := filepath.Join(c.rootPath, ".gitgo", "objects")
+	combinedRoot := c.combineTreeWithStaged(previousTreeHash, entries, objectsPath)
+	treeHash, err := c.createTreeFromNode(combinedRoot, objectsPath)
+	if err != nil {
+		return fmt.Errorf("failed to create tree: %v", err)
+	}
+
 	if hash, err := os.ReadFile(branchPath); err == nil {
 		parentHash = strings.TrimSpace(string(hash))
 	}
@@ -145,4 +158,67 @@ func (c *CommitCommand) createTreeFromNode(node *pathNode, objectsPath string) (
 		return "", fmt.Errorf("failed to write tree: %v", err)
 	}
 	return hash, nil
+}
+
+func (c *CommitCommand) combineTreeWithStaged(previousTreeHash string, stagedEntries []*staging.Entry, objectsPath string) *pathNode {
+	root := NewPathNode()
+
+	if previousTreeHash != "" {
+		previousTree, err := tree.Read(objectsPath, previousTreeHash)
+		if err != nil {
+			fmt.Printf("Warning: could not read previous tree: %v\n", err)
+		} else {
+			for _, entry := range previousTree.Entries() {
+				if entry.Mode == tree.DirectoryMode {
+					c.addTreeEntriesToPathNode(root, entry.Name, entry.Hash, objectsPath)
+				} else {
+					root.files[entry.Name] = staging.Entry{
+						Path: entry.Name,
+						Hash: entry.Hash,
+						Mode: fs.FileMode(entry.Mode),
+					}
+				}
+			}
+		}
+	}
+
+	for _, entry := range stagedEntries {
+		parts := strings.Split(entry.Path, "/")
+		current := root
+
+		for i := 0; i < len(parts)-1; i++ {
+			dirName := parts[i]
+			if _, exists := current.children[dirName]; !exists {
+				current.children[dirName] = NewPathNode()
+			}
+			current = current.children[dirName]
+		}
+
+		filename := parts[len(parts)-1]
+		current.files[filename] = *entry
+	}
+
+	return root
+}
+
+func (c *CommitCommand) addTreeEntriesToPathNode(root *pathNode, prefix string, treeHash string, objectsPath string) {
+	subtree, err := tree.Read(objectsPath, treeHash)
+	if err != nil {
+		fmt.Printf("Warning: could not read subtree %s: %v\n", treeHash, err)
+		return
+	}
+
+	for _, entry := range subtree.Entries() {
+		fullPath := filepath.Join(prefix, entry.Name)
+
+		if entry.Mode == tree.DirectoryMode {
+			c.addTreeEntriesToPathNode(root, fullPath, entry.Hash, objectsPath)
+		} else {
+			root.files[fullPath] = staging.Entry{
+				Path: fullPath,
+				Hash: entry.Hash,
+				Mode: fs.FileMode(entry.Mode),
+			}
+		}
+	}
 }

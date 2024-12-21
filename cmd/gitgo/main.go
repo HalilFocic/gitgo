@@ -96,7 +96,6 @@ func main() {
 				os.Exit(1)
 			}
 		} else {
-			// List branches
 			cmd := commands.NewBranchCommand(cwd, "", "list")
 			if err := cmd.Execute(); err != nil {
 				fmt.Printf("error: %v\n", err)
