@@ -369,4 +369,8 @@ func (idx *Index) Read() error {
 
 func (idx *Index) Clear() {
 	idx.entries = make(map[string]*Entry)
+	err := idx.Write()
+	if err != nil {
+		fmt.Printf("failed to clear index\n")
+	}
 }

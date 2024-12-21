@@ -75,6 +75,7 @@ func (c *CommitCommand) Execute() error {
 	if err := os.WriteFile(branchPath, []byte(commitHash), 0644); err != nil {
 		return fmt.Errorf("failed to update branch reference: %v", err)
 	}
+	index.Clear()
 	return nil
 }
 
