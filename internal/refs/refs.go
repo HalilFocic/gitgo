@@ -113,3 +113,21 @@ func DeleteBranch(rootPath, name string) error {
 	}
 	return nil
 }
+
+func ListBranches(rootPath string) ([]string, error) {
+	headsDir := filepath.Join(rootPath, ".gitgo", "refs", "heads")
+
+	files, err := os.ReadDir(headsDir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read refs directory: %v", err)
+	}
+
+	var branches []string
+	for _, file := range files {
+		if !file.IsDir() {
+			branches = append(branches, file.Name())
+		}
+	}
+
+	return branches, nil
+}
