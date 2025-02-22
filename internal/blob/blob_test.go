@@ -2,13 +2,16 @@ package blob
 
 import (
 	"bytes"
+	"github.com/HalilFocic/gitgo/internal/config"
 	"os"
 	"path/filepath"
 	"testing"
 )
 
 func TestBlobOperations(t *testing.T) {
+	objectsPath := filepath.Join(config.GitDirName, "objects")
 	t.Run("1.2: Create and store blob", func(t *testing.T) {
+
 		content := []byte("test content")
 
 		// Create new blob
@@ -23,14 +26,15 @@ func TestBlobOperations(t *testing.T) {
 		}
 
 		// Store the blob
-		err = b.Store(".gitgo/objects")
+		err = b.Store(objectsPath)
 		if err != nil {
 			t.Fatalf("Failed to store blob: %v", err)
 		}
+		defer os.RemoveAll(config.GitDirName)
 
 		// Check if file exists in correct location
 		hash := b.Hash()
-		objectPath := filepath.Join(".gitgo/objects", hash[:2], hash[2:])
+		objectPath := filepath.Join(objectsPath, hash[:2], hash[2:])
 		if _, err := os.Stat(objectPath); os.IsNotExist(err) {
 			t.Error("Blob file was not created in correct location")
 		}
@@ -39,10 +43,10 @@ func TestBlobOperations(t *testing.T) {
 	t.Run("1.3: Read blob content", func(t *testing.T) {
 		content := []byte("test content")
 		originalBlob, _ := New(content)
-		originalBlob.Store(".gitgo/objects")
-
+		originalBlob.Store(objectsPath)
+		defer os.RemoveAll(config.GitDirName)
 		// Read blob back
-		readBlob, err := Read(".gitgo/objects", originalBlob.Hash())
+		readBlob, err := Read(objectsPath, originalBlob.Hash())
 		if err != nil {
 			t.Fatalf("Failed to read blob: %v", err)
 		}
@@ -52,3 +56,5 @@ func TestBlobOperations(t *testing.T) {
 		}
 	})
 }
+
+

@@ -1,12 +1,10 @@
 package repository
-
 import (
-	"errors"
-	"fmt"
-	"os"
-	"path/filepath"
+    "fmt"
+    "os"
+    "path/filepath"
+    "github.com/HalilFocic/gitgo/internal/config"
 )
-
 type Repository struct {
 	Path     string
 	GitgoDir string
@@ -17,11 +15,11 @@ func Init(path string) (*Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	gitGoPath := filepath.Join(absPath, ".gitgo")
+	gitGoPath := filepath.Join(absPath, config.GitDirName)
 
 	file, err := os.Stat(gitGoPath)
 	if err == nil && file != nil {
-		return nil, errors.New("repository already exists in this repository")
+		return nil, fmt.Errorf("repository already exists in this directory")
 	}
 
 	objectsPath := filepath.Join(gitGoPath, "objects")
@@ -68,13 +66,12 @@ func Init(path string) (*Repository, error) {
 		GitgoDir: gitGoPath,
 	}, nil
 }
-
 func IsRepository(path string) bool {
 	absPath, err := filepath.Abs(path)
 	if err != nil {
 		return false
 	}
-	gitGoPath := filepath.Join(absPath, ".gitgo")
+    gitGoPath := filepath.Join(absPath,config.GitDirName)
 	dirs := []string{
 		".",
 		"./objects",
@@ -98,3 +95,4 @@ func (r *Repository) ObjectPath() string {
 func (r *Repository) RefsPath() string {
 	return filepath.Join(r.GitgoDir, "refs")
 }
+
